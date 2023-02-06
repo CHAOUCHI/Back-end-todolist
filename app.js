@@ -1,71 +1,32 @@
+/**Base de données */
+const { sequelize } = require("./bdd/initSequelize");
+const models = require("./bdd/models");
+
+/**Serveur web */
 const express = require("express");
-const {Sequelize,DataTypes} = require("sequelize");
 const app = express();
-
-const sequelize = new Sequelize("todolist","todolist_admin","todolist_admin",{
-    dialect:"mariadb"
-});
-
-const TodoList = sequelize.define("TodoList",{
-    task : DataTypes.JSON
-});
-sequelize.sync();
-
 app.use(express.json());
 
+// api/lists
+require("./api/lists/getAllLists")(sequelize,app);
+// api/list/:id
+require("./api/list/getOneList")(sequelize,app);
+// api/list
+require("./api/list/postOneList")(sequelize,app);
+// api/list/delete/:id
+require("./api/list/delete/deleteOneList")(sequelize,app);
+// api/list/update
+require("./api/list/update/updateOneList")(sequelize,app);
+
+
 /**
- * Route : /api/lists
- * Results : [
- *  ...{ 
- *     name  : string
- *     tasks : [
- *          text : string,
- *          cross : boolean
- *      ]
- *  }
- * ]
+ * 404 route
  */
-app.get("/api/lists",async (req,res)=>{
-    let lists = [
-        { 
-            name  : "string",
-            tasks : [
-                "string",
-                "boolean"
-            ]
-        },
-        { 
-            name  : "string",
-            tasks : [
-                "string",
-                "boolean"
-            ]
-        },
-        { 
-            name  : "string",
-            tasks : [
-                "string",
-                "boolean"
-            ]
-        }
-    ];
-    const todolists = await TodoList.findAll();
-    res.status(200).json(todolists)
-});
-app.use("/api",(req,res)=>{
-    let routes = `
-        <h1>Routes dispo</h1>
-        <ul>
-            <li> /api/lists </li>
-            <li> /api/lists/id </li>
-        </ul>
-    `;
-    res.status(404).send(routes);
-});
 app.use((req,res)=>{
-    console.log("Reach 404");
-    res.status(404).json("Ressource invalid");
+    const message = "Error 404 Ressource not founds";
+    const data = null;
+    res.status(404).json({message,data});
 });
-app.listen(3000,function(){
+app.listen(4000,function(){
     console.log(`Serveur start on localhost:3000`)
 });
